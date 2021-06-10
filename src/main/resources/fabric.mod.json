@@ -1,29 +1,32 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "citizens",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Citizens",
+  "description": "Allows villagers to actually complete tasks based on their profession",
   "authors": [
-    "Me!"
+    "Luke Graham Landry"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://lukegrahamlandry.ca/",
+    "sources": "https://github.com/LukeGrahamLandry/citizens-mod"
   },
 
-  "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "license": "MIT",
+  "icon": "assets/citizens/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "ca.lukegrahamlandry.citizens.CitizensMain"
+    ],
+    "client": [
+      "ca.lukegrahamlandry.citizens.client.CitizensClient"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "citizens.mixins.json"
   ],
 
   "depends": {

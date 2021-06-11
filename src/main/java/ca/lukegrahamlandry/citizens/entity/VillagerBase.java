@@ -35,4 +35,14 @@ public abstract class VillagerBase extends PathAwareEntity {
         this.goalSelector.add(1, new FleeEntityGoal(this, ZoglinEntity.class, 10.0F, 0.5D, 0.5D));
         this.goalSelector.add(1, new EscapeDangerGoal(this, 0.5D));
     }
+
+    // instead of these, maybe I should use a time based task system like normal villagers
+
+    public void onDayStart(){
+        // go to work
+    }
+
+    public void onDayEnd(){
+        // go home and sleep
+    }
 }

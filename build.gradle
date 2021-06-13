@@ -16,6 +16,9 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	maven { url = 'https://ladysnake.jfrog.io/artifactory/mods' }
+
+	maven { url = 'https://maven.jamieswhiteshirt.com/libs-release/' }
 }
 
 dependencies {
@@ -29,6 +32,18 @@ dependencies {
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
+
+
+	// Replace modImplementation with modApi if you expose components in your own API
+	modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.7.13"
+	modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.7.13"
+	// Includes Cardinal Components API as a Jar-in-Jar dependency (optional but recommended)
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.7.13"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:2.7.13"
+
+	modImplementation "io.github.ladysnake:automatone:0.4.0"
+	include "io.github.ladysnake:automatone:0.4.0"
+
 }
 
 processResources {
@@ -83,5 +98,12 @@ publishing {
 		// Notice: This block does NOT have the same function as the block in the top level.
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
+	}
+}
+
+// feels like a bad idea
+configurations.all {
+	resolutionStrategy {
+		force 'com.jamieswhiteshirt:reach-entity-attributes:2.1.1'
 	}
 }

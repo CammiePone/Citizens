@@ -23,6 +23,9 @@
     ],
     "client": [
       "ca.lukegrahamlandry.citizens.client.CitizensClient"
+    ],
+    "cardinal-components-entity": [
+      "ca.lukegrahamlandry.citizens.AutomatoneSetup"
     ]
   },
   "mixins": [

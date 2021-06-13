@@ -18,7 +18,7 @@ import java.util.Map;
 public class EntityInit {
     public static final Map<EntityType, Identifier> ENTITIES = new HashMap<>();
 
-    public static final EntityType<FarmerEntity> FARMER = create("farmer", FarmerEntity::new, VillagerBase.attributes(), 0.8F, 2);
+    public static final EntityType<FarmerEntity> FARMER = create("farmer", FarmerEntity::new, VillagerBase.attributes(), 0.6F, 1.95F);
 
     private static EntityType create(String name, EntityType.EntityFactory supplier, DefaultAttributeContainer.Builder attributes, float width, float height) {
         EntityType type = FabricEntityTypeBuilder.create(SpawnGroup.MISC, supplier).dimensions(EntityDimensions.fixed(width, height)).build();

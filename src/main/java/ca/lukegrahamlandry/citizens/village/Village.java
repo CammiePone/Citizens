@@ -13,11 +13,13 @@ public class Village {
     // yeah lets go with that
     // need mixin on item frames or add a Building Marker Frame to map out the village on world load
 
-    List<BuildingBase> buildings = new ArrayList<>();
-    List<VillagerBase> villagers = new ArrayList<>();
+    public List<BuildingBase> buildings = new ArrayList<>();
+    public List<VillagerBase> villagers = new ArrayList<>();
+
     public Village(){
 
     }
 
-
+    // temp
+    public static Village INSTANCE = new Village();
 }

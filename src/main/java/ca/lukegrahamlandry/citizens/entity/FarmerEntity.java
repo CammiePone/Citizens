@@ -15,13 +15,6 @@ public class FarmerEntity extends VillagerBase {
 
     @Override
     public void tick() {
-        // test
-        if (!world.isClient() && this.firstUpdate){
-            System.out.println("path");
-            IBaritone baritone = BaritoneAPI.getProvider().getBaritone(this);
-            baritone.getCustomGoalProcess().setGoalAndPath(new GoalXZ(10000, 20000));
-        }
-
         super.tick();
     }
 

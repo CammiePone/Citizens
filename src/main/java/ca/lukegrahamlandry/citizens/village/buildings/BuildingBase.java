@@ -1,5 +1,6 @@
 package ca.lukegrahamlandry.citizens.village.buildings;
 
+import ca.lukegrahamlandry.citizens.CitizensMain;
 import ca.lukegrahamlandry.citizens.entity.VillagerBase;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DoorBlock;
@@ -34,16 +35,20 @@ public abstract class BuildingBase {
     // -
     public boolean validate(){
         BlockPos doorPos = getAdjacentDoor(this.markerPos);
+        CitizensMain.log("doorPos: " + doorPos);
         if (doorPos == null) return false;
 
         BlockPos floorStart = getFirstFloorSpot(doorPos);
+        CitizensMain.log("floorStart: " + floorStart);
         if (floorStart == null) return false;
         this.floorSpace.add(floorStart);
 
         crawlForFloorSpace(floorStart);
 
+        CitizensMain.log("floor: " + floorSpace);
+
         // todo: check marker, walls
-        return false;
+        return true;
     }
 
     protected BlockPos getAdjacentDoor(BlockPos start){
@@ -105,5 +110,9 @@ public abstract class BuildingBase {
         for (BlockPos pos : this.floorSpace){
             ((ServerWorld)this.world).addParticle(ParticleTypes.GLOW_SQUID_INK, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 0);
         }
+    }
+
+    public BlockPos getFirstInsidePos(){
+        return this.floorSpace.get(0);
     }
 }

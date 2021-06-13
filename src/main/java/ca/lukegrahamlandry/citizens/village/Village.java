@@ -2,6 +2,7 @@ package ca.lukegrahamlandry.citizens.village;
 
 import ca.lukegrahamlandry.citizens.entity.VillagerBase;
 import ca.lukegrahamlandry.citizens.village.buildings.BuildingBase;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,23 @@ public class Village {
 
     }
 
-    // temp
-    public static Village INSTANCE = new Village();
+    public static List<Village> all = new ArrayList<>();
+
+    // todo: config max range
+    public static Village findClosestVillage(BlockPos blockPos) {
+        Village closest = null;
+        double bestDistSq = Integer.MAX_VALUE;
+        for (Village village : all){
+            for (BuildingBase building : village.buildings){
+                BlockPos check = building.getFirstInsidePos();
+                double distSq = Math.pow(check.getX() - blockPos.getX(), 2) + Math.pow(check.getZ() - blockPos.getZ(), 2);
+                if (distSq < bestDistSq){
+                    bestDistSq = distSq;
+                    closest = village;
+                }
+            }
+        }
+
+        return closest;
+    }
 }

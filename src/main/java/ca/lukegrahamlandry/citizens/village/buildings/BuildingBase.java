@@ -23,7 +23,7 @@ public abstract class BuildingBase {
     protected List<BlockPos> floorSpace = new ArrayList<>();
 
     // holds workers / residents that have claimed this building
-    protected final List<VillagerBase> villagers = new ArrayList<>();
+    public final List<VillagerBase> villagers = new ArrayList<>();
 
     public BuildingBase(World world, BlockPos markerPos){
         this.world = world;

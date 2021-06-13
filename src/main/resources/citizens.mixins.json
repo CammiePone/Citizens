@@ -4,9 +4,9 @@
   "package": "ca.lukegrahamlandry.citizens.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "ItemFrameMixin"
   ],
   "client": [
-    "ExampleMixin"
   ],
   "injectors": {
     "defaultRequire": 1

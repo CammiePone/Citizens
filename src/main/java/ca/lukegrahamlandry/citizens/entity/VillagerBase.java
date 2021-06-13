@@ -4,6 +4,7 @@ import ca.lukegrahamlandry.citizens.CitizensMain;
 import ca.lukegrahamlandry.citizens.goals.CommuteGoal;
 import ca.lukegrahamlandry.citizens.village.Village;
 import ca.lukegrahamlandry.citizens.village.buildings.BuildingBase;
+import ca.lukegrahamlandry.citizens.village.buildings.HouseBuilding;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.EscapeDangerGoal;
 import net.minecraft.entity.ai.goal.FleeEntityGoal;
@@ -13,6 +14,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
+import org.lwjgl.system.CallbackI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,7 @@ public abstract class VillagerBase extends PathAwareEntity {
     }
 
     public static DefaultAttributeContainer.Builder attributes() {
-        return createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 20);
+        return createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0D).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2D);
     }
 
     public abstract Identifier getTexture();
@@ -68,16 +70,16 @@ public abstract class VillagerBase extends PathAwareEntity {
 
     @Override
     public void tick() {
-        if (!world.isClient() && this.firstUpdate && Village.INSTANCE.buildings.size() > 0){
-            this.home = Village.INSTANCE.buildings.get(0);
-        }
-
         super.tick();
+
+        if (!world.isClient() && this.home == null){
+            this.tryFindAHome();
+        }
 
         if (!world.isClient()){
             // todo: dont hard code the time
             // todo: have some complicated system for telling which times are work and sleep
-            if (world.getTimeOfDay() > 12000 && !atOrGoingHome()){
+            if (world.getTimeOfDay() > 12000 && !atOrGoingHome() && !(this.home == null)){
                 CitizensMain.log("home time");
                 this.queueActivity(Activity.COMMUTE);
                 this.commuteLocation = this.home;
@@ -92,6 +94,23 @@ public abstract class VillagerBase extends PathAwareEntity {
             }
 
         }
+    }
+
+    protected boolean tryFindAHome(){
+        Village village = Village.findClosestVillage(this.getBlockPos());
+        if (village == null) return false;
+        for (BuildingBase building : village.buildings){
+            if (building instanceof HouseBuilding){
+                if (((HouseBuilding) building).hasAvailableBed()) {
+                    building.villagers.add(this);
+                    this.home = building;
+                    village.villagers.add(this);
+                    CitizensMain.log("found home at: " + building.getFirstInsidePos());
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean atOrGoingHome() {

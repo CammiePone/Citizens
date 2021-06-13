@@ -13,18 +13,5 @@ public class DebugItem extends Item {
         super(settings);
     }
 
-    @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        if (!context.getWorld().isClient()){
-            CitizensMain.log("click");
-            BuildingBase building = new HouseBuilding(context.getWorld(), context.getBlockPos());
-            boolean valid = building.validate();
-            if (valid){
-                building.displayFloorSpace();
-                Village.INSTANCE.buildings.add(building);
-            }
-        }
 
-        return ActionResult.SUCCESS;
-    }
 }

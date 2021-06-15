@@ -16,13 +16,10 @@ import net.minecraft.entity.mob.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
-
 // todo: extend PlayerEntity for mod compatibility (guns!)
 public abstract class VillagerBase extends PathAwareEntity {
     protected BuildingBase home;
-    protected BuildingBase work;
+    public BuildingBase work;
     protected Village village;
     protected VillagerBase(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
@@ -103,7 +100,7 @@ public abstract class VillagerBase extends PathAwareEntity {
         return true;
     }
 
-    private boolean atBuilding(BuildingBase building) {
+    public boolean atBuilding(BuildingBase building) {
         return building.getFloorSpace().contains(this.getBlockPos());
     }
 
@@ -112,7 +109,7 @@ public abstract class VillagerBase extends PathAwareEntity {
         if (checkVillage == null) return false;
         for (BuildingBase building : checkVillage.buildings){
             if (building instanceof HouseBuilding){
-                if (((HouseBuilding) building).hasAvailableBed()) {
+                if (building.hasOpenSpace()) {
                     this.village = checkVillage;
                     building.villagers.add(this);
                     this.home = building;

@@ -107,3 +107,7 @@ configurations.all {
 		force 'com.jamieswhiteshirt:reach-entity-attributes:2.1.1'
 	}
 }
+
+
+// why is intellij mad about java 16
+// ./gradlew runClient -D org.gradle.java.home=/Library/Java/JavaVirtualMachines/adoptopenjdk-16.jdk/Contents/Home

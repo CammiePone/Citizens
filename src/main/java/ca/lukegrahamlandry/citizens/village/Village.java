@@ -24,6 +24,7 @@ public class Village {
     public static List<Village> all = new ArrayList<>();
 
     // todo: config max range
+    // todo: dimemnsion sensitive
     public static Village findClosestVillage(BlockPos blockPos) {
         Village closest = null;
         double bestDistSq = Integer.MAX_VALUE;

@@ -40,6 +40,7 @@ public class CommuteGoal extends Goal {
     @Override
     public void stop() {
         CitizensMain.log("done");
-        this.villager.currentActivity = this.villager.getNextActivity();
+        this.villager.currentActivity = null;
+        this.villager.commuteLocation = null;
     }
 }

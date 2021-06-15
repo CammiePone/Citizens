@@ -14,4 +14,12 @@ public class NitWitEntity extends VillagerBase{
     public Identifier getTexture() {
         return new Identifier(CitizensMain.MOD_ID, "textures/entity/nitwit");
     }
+
+    // todo: different default schedual thats all wander no work
+
+    @Override
+    protected boolean tryFindWork() {
+        // doesnt work anywhere;
+        return false;
+    }
 }

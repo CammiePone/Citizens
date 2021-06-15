@@ -46,7 +46,7 @@ public class HouseBuilding extends BuildingBase {
     }
 
     // must call validate() first to calculate this.totalBeds
-    public boolean hasAvailableBed(){
+    public boolean hasOpenSpace(){
         return this.villagers.size() < this.totalBeds;
     }
 }

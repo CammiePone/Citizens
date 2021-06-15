@@ -35,4 +35,11 @@ public class FarmBuilding extends BuildingBase {
         BlockState downState = this.world.getBlockState(floorSpot.down());
         return downState.isIn(BlockTags.DIRT) || downState.isOf(Blocks.FARMLAND);
     }
+
+    @Override
+    public boolean hasOpenSpace() {
+        return this.villagers.size() == 0;
+    }
+
+
 }

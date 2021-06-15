@@ -29,6 +29,7 @@ public abstract class ItemFrameMixin {
 			BuildingBase building = ((BuildingItem) stack.getItem()).getBuilding(frame.getEntityWorld(), pos);
 			boolean valid = building.validate();
 			if (valid){
+				building.displayFloorSpace();
 				Village village = Village.findClosestVillage(pos);
 				if (village == null) {
 					CitizensMain.log("create village");

@@ -23,6 +23,7 @@ public abstract class BuildingBase {
     protected List<BlockPos> floorSpace = new ArrayList<>();
 
     // holds workers / residents that have claimed this building
+    // todo: remove self on death
     public final List<VillagerBase> villagers = new ArrayList<>();
 
     public BuildingBase(World world, BlockPos markerPos){
@@ -31,9 +32,13 @@ public abstract class BuildingBase {
     }
 
     // checks requirements to be a valid building:
-    // - door next to the marker
-    // -
+    // that there's a door next to the marker
+    // crawls floor space checks for roof
+    // side effect: populates this.floorSpace
+    // todo: auto check this over time not just when created
     public boolean validate(){
+        this.floorSpace.clear();
+
         BlockPos doorPos = getAdjacentDoor(this.markerPos);
         CitizensMain.log("doorPos: " + doorPos);
         if (doorPos == null) return false;
@@ -108,11 +113,17 @@ public abstract class BuildingBase {
     public void displayFloorSpace(){
         if (!this.world.isClient()) return;
         for (BlockPos pos : this.floorSpace){
-            ((ServerWorld)this.world).addParticle(ParticleTypes.GLOW_SQUID_INK, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 0);
+            ((ServerWorld)this.world).addParticle(ParticleTypes.BARRIER, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 0, 0, 0);
         }
     }
 
     public BlockPos getFirstInsidePos(){
         return this.floorSpace.get(0);
     }
+
+    public List<BlockPos> getFloorSpace(){
+        return this.floorSpace;
+    }
+
+    public abstract boolean hasOpenSpace();
 }

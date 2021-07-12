@@ -25,7 +25,7 @@ public class FarmGoal extends Goal {
     IBaritone baritone;
     BlockPos target;
     private boolean done;
-    private int delay;
+    private int delay = 10;
     ServerWorld world;
 
     public FarmGoal(FarmerEntity me) {
@@ -40,7 +40,7 @@ public class FarmGoal extends Goal {
 
     @Override
     public void start() {
-
+        System.out.println("FarmGoal start()");
     }
 
     @Override
@@ -74,9 +74,11 @@ public class FarmGoal extends Goal {
         }
 
         if (!this.baritone.isActive()){
+            System.out.println("begin farm");
             BlockState state = this.world.getBlockState(this.target);
 
             if (state.getBlock() instanceof CropBlock && ((CropBlock) state.getBlock()).isMature(state)){
+                System.out.println("break");
                 this.world.breakBlock(this.target, true, this.villager);
                 // todo: collect drops
             }
@@ -91,16 +93,21 @@ public class FarmGoal extends Goal {
                 if (seedIndex >= 0){
                     Inventory inv = this.villager.getInventory();
                     ItemStack seeds = inv.getStack(seedIndex);
+                    System.out.println("found seed " + seeds );
 
                     if (seeds.getItem() instanceof BlockItem && ((BlockItem)seeds.getItem()).getBlock() instanceof CropBlock){
                         CropBlock block = (CropBlock) ((BlockItem)seeds.getItem()).getBlock();
                         if (block.canPlaceAt(soil, world, this.target)){
                             world.setBlockState(this.target, block.getDefaultState(), 3);
                             seeds.decrement(1);
+                            System.out.println("is farm");
                         } else {
+                            // todo: check that is dirt even tho the building should have checked already it might have changed
                             // todo: require having a hoe and do animation and use durability
-                            world.setBlockState(this.target, Blocks.FARMLAND.getDefaultState(), 3);
+                            world.setBlockState(this.target.down(), Blocks.FARMLAND.getDefaultState(), 3);
+                            System.out.println("make farm");
                             if (block.canPlaceAt(soil, world, this.target)){
+                                System.out.println("use farm");
                                 world.setBlockState(this.target, block.getDefaultState(), 3);
                                 seeds.decrement(1);
                             }
@@ -110,6 +117,8 @@ public class FarmGoal extends Goal {
                     inv.setStack(seedIndex, seeds);
                 }
             }
+
+            this.target = null;
         }
     }
 
@@ -135,7 +144,7 @@ public class FarmGoal extends Goal {
 
     @Override
     public void stop() {
-        CitizensMain.log("done");
+        CitizensMain.log("done farm");
         this.villager.currentActivity = null;
         this.villager.commuteLocation = null;
     }

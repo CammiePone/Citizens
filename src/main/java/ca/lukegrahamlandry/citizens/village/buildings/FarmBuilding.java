@@ -12,6 +12,8 @@ public class FarmBuilding extends BuildingBase {
         super(world, markerPos);
     }
 
+    // TODO: it could pick the wrong side of the gate if both are valid farm land (cause doesnt need a roof)
+
     // finds a fence instead of door
     @Override
     protected BlockPos getAdjacentDoor(BlockPos start){

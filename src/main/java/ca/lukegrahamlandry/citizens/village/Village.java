@@ -2,6 +2,7 @@ package ca.lukegrahamlandry.citizens.village;
 
 import ca.lukegrahamlandry.citizens.entity.VillagerBase;
 import ca.lukegrahamlandry.citizens.village.buildings.BuildingBase;
+import ca.lukegrahamlandry.citizens.village.buildings.StoreHouseBuilding;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;

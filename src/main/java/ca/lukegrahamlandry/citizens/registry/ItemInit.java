@@ -7,6 +7,7 @@ import ca.lukegrahamlandry.citizens.items.BuildingItem;
 import ca.lukegrahamlandry.citizens.items.DebugItem;
 import ca.lukegrahamlandry.citizens.village.buildings.FarmBuilding;
 import ca.lukegrahamlandry.citizens.village.buildings.HouseBuilding;
+import ca.lukegrahamlandry.citizens.village.buildings.StoreHouseBuilding;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
@@ -27,6 +28,7 @@ public class ItemInit {
 
     public static final Item FARM_MARKER = create("farm_marker", new BuildingItem(FarmBuilding::new, props()));
     public static final Item HOUSE_MARKER = create("house_marker", new BuildingItem(HouseBuilding::new, props()));
+    public static final Item CHESTS_MARKER = create("chests_marker", new BuildingItem(StoreHouseBuilding::new, props()));
 
     private static Item.Settings props() {
         return new Item.Settings();

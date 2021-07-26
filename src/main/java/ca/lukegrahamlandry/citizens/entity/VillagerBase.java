@@ -16,14 +16,34 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.*;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.GenericContainerScreenHandler;
+import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class VillagerBase extends PlayerMob {
+import java.util.Iterator;
+import java.util.List;
+
+// should eventually not be a PathAwareEntity and just use automatone for all pathfinding
+public abstract class VillagerBase extends PathAwareEntity {
     protected BuildingBase home;
     public BuildingBase work;
     protected Village village;
+    public MainInventory inventory = new MainInventory();
+
     protected VillagerBase(EntityType<? extends VillagerBase> entityType, World world) {
         super(entityType, world);
     }
@@ -39,10 +59,10 @@ public abstract class VillagerBase extends PlayerMob {
     protected void initGoals() {
         this.goalSelector.add(2, new CommuteGoal(this));
 
-        // Activity.PANIC
-        // have to remake these to use automatone pathfinding because we no longer have vanilla's pathfinding stuff from PathAwareEntity
+        // TODO: Activity.PANIC
+        // have to remake these to use automatone pathfinding
         // have fear (same as normal villagers)
-        /*
+
         this.goalSelector.add(1, new FleeEntityGoal(this, ZombieEntity.class, 8.0F, 0.5D, 0.5D));
         this.goalSelector.add(1, new FleeEntityGoal(this, EvokerEntity.class, 12.0F, 0.5D, 0.5D));
         this.goalSelector.add(1, new FleeEntityGoal(this, VindicatorEntity.class, 8.0F, 0.5D, 0.5D));
@@ -52,7 +72,6 @@ public abstract class VillagerBase extends PlayerMob {
         this.goalSelector.add(1, new FleeEntityGoal(this, ZoglinEntity.class, 10.0F, 0.5D, 0.5D));
         this.goalSelector.add(1, new EscapeDangerGoal(this, 0.5D));
 
-         */
     }
 
     public enum Activity {
@@ -170,5 +189,116 @@ public abstract class VillagerBase extends PlayerMob {
     public void startCommuteTo(BuildingBase building){
         this.commuteLocation = building;
         this.currentActivity = Activity.COMMUTE;
+    }
+
+    @Override
+    public ActionResult interactMob(PlayerEntity player, Hand hand) {
+        if (world.isClient) {
+            return ActionResult.SUCCESS;
+        } else {
+            player.openHandledScreen(new NamedScreenHandler());
+            return ActionResult.SUCCESS;
+        }
+    }
+
+    class NamedScreenHandler implements NamedScreenHandlerFactory {
+        @Override
+        public Text getDisplayName() {
+            return new LiteralText("Villager Inventory");
+        }
+
+        @Override
+        public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
+            return new GenericContainerScreenHandler(ScreenHandlerType.GENERIC_9X4, syncId, inv, VillagerBase.this.inventory, 4);
+        }
+    }
+
+    // just for simple display for now
+    // TODO: eventually make real ui on the villager that includes armor & happiness, etc
+    // will have to do main hand & off hand properly
+    // TODO: save in nbt
+
+    class MainInventory implements Inventory {
+        private final DefaultedList<ItemStack> main;
+
+        public MainInventory(){
+            this.main = DefaultedList.ofSize(36, ItemStack.EMPTY);
+        }
+
+        @Override
+        public int size() {
+            return this.main.size();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return this.main.isEmpty();
+        }
+
+        @Override
+        public ItemStack getStack(int slot) {
+            return this.main.get(slot);
+        }
+
+
+        // login taken from PlayerInventory
+        @Override
+        public ItemStack removeStack(int slot, int amount) {
+            List<ItemStack> list = null;
+
+            DefaultedList defaultedList;
+            for(Iterator var4 = this.main.iterator(); var4.hasNext(); slot -= defaultedList.size()) {
+                defaultedList = (DefaultedList)var4.next();
+                if (slot < defaultedList.size()) {
+                    list = defaultedList;
+                    break;
+                }
+            }
+
+            return list != null && !((ItemStack)list.get(slot)).isEmpty() ? Inventories.splitStack(list, slot, amount) : ItemStack.EMPTY;
+        }
+
+        // login taken from PlayerInventory
+        @Override
+        public ItemStack removeStack(int slot) {
+            DefaultedList<ItemStack> defaultedList = null;
+
+            DefaultedList defaultedList2;
+            for(Iterator var3 = this.main.iterator(); var3.hasNext(); slot -= defaultedList2.size()) {
+                defaultedList2 = (DefaultedList)var3.next();
+                if (slot < defaultedList2.size()) {
+                    defaultedList = defaultedList2;
+                    break;
+                }
+            }
+
+            if (defaultedList != null && !((ItemStack)defaultedList.get(slot)).isEmpty()) {
+                ItemStack itemStack = (ItemStack)defaultedList.get(slot);
+                defaultedList.set(slot, ItemStack.EMPTY);
+                return itemStack;
+            } else {
+                return ItemStack.EMPTY;
+            }
+        }
+
+        @Override
+        public void setStack(int slot, ItemStack stack) {
+            this.main.set(slot, stack);
+        }
+
+        @Override
+        public void markDirty() {
+            ;
+        }
+
+        @Override
+        public boolean canPlayerUse(PlayerEntity player) {
+            return true;
+        }
+
+        @Override
+        public void clear() {
+            this.main.clear();
+        }
     }
 }

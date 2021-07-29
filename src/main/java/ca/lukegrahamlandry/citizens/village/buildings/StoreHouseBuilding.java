@@ -1,6 +1,7 @@
 package ca.lukegrahamlandry.citizens.village.buildings;
 
 import ca.lukegrahamlandry.citizens.CitizensMain;
+import ca.lukegrahamlandry.citizens.util.IItemPredicate;
 import ca.lukegrahamlandry.citizens.village.Village;
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.BlockState;
@@ -83,12 +84,12 @@ public class StoreHouseBuilding extends BuildingBase {
         return false;
     }
 
-    public ItemStack getItem(Item item){
+    public ItemStack getItem(IItemPredicate predicate){
         for (Inventory chest : this.chests){
             for (int i=0;i<chest.size();i++){
                 ItemStack check = chest.getStack(i);
 
-                if (check.getItem() == item){
+                if (predicate.check(check)){
                     chest.setStack(i, ItemStack.EMPTY);
                     return check;
                 }
@@ -121,15 +122,15 @@ public class StoreHouseBuilding extends BuildingBase {
         return null;
     }
 
-    public static StoreHouseBuilding findStoreHouseWith(Village village, Item item){
-        if (village == null || item == null) return null;
+    public static StoreHouseBuilding findStoreHouseWith(Village village, IItemPredicate predicate){
+        if (village == null || predicate == null) return null;
 
         for (BuildingBase building : village.buildings){
             if (building instanceof StoreHouseBuilding){
                 for (Inventory chest : ((StoreHouseBuilding) building).chests){
                     for (int i=0;i<chest.size();i++){
                         ItemStack check = chest.getStack(i);
-                        if (check.getItem() == item){
+                        if (predicate.check(check)){
                             return ((StoreHouseBuilding) building);
                         }
                     }

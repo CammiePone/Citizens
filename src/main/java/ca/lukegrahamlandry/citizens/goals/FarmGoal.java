@@ -8,6 +8,7 @@ import ca.lukegrahamlandry.citizens.CitizensConfig;
 import ca.lukegrahamlandry.citizens.CitizensMain;
 import ca.lukegrahamlandry.citizens.entity.FarmerEntity;
 import ca.lukegrahamlandry.citizens.entity.VillagerBase;
+import ca.lukegrahamlandry.citizens.util.FetchType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -91,7 +92,7 @@ public class FarmGoal extends Goal {
 
                 int seedIndex = pickSeeds();
                 if (seedIndex >= 0){
-                    Inventory inv = this.villager.getInventory();
+                    Inventory inv = this.villager.inventory;
                     ItemStack seeds = inv.getStack(seedIndex);
                     System.out.println("found seed " + seeds );
 
@@ -125,11 +126,15 @@ public class FarmGoal extends Goal {
     // todo: add some random so it uses different seeds
     // todo: only plant seeds next to same seed type or have gui let you select which seeds to use
     private int pickSeeds() {
-        Inventory inv = this.villager.getInventory();
+        Inventory inv = this.villager.inventory;
         for (int i=0;i<inv.size();i++){
             ItemStack check = inv.getStack(i);
             if (CitizensConfig.isSeed(check.getItem())) return i;
         }
+
+        // go to store house and grab a stack of seeds
+        this.villager.itemsToGet.add(FetchType.SEEDS);
+
 
         return -1;
     }

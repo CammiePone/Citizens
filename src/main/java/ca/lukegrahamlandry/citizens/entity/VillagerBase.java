@@ -3,9 +3,11 @@ package ca.lukegrahamlandry.citizens.entity;
 import ca.lukegrahamlandry.citizens.CitizensMain;
 import ca.lukegrahamlandry.citizens.goals.CommuteGoal;
 import ca.lukegrahamlandry.citizens.goals.VillagerSchedule;
+import ca.lukegrahamlandry.citizens.util.FetchType;
 import ca.lukegrahamlandry.citizens.village.Village;
 import ca.lukegrahamlandry.citizens.village.buildings.BuildingBase;
 import ca.lukegrahamlandry.citizens.village.buildings.HouseBuilding;
+import ca.lukegrahamlandry.citizens.village.buildings.StoreHouseBuilding;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.EscapeDangerGoal;
@@ -19,6 +21,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.NamedScreenHandlerFactory;
@@ -34,8 +37,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 // should eventually not be a PathAwareEntity and just use automatone for all pathfinding
 public abstract class VillagerBase extends PathAwareEntity {
@@ -43,6 +49,11 @@ public abstract class VillagerBase extends PathAwareEntity {
     public BuildingBase work;
     protected Village village;
     public MainInventory inventory = new MainInventory();
+
+    public List<FetchType> itemsToGet = new ArrayList<>();
+
+    // farmer should add hoe, miners would need pick torches etc
+    private List<FetchType> requiredTools = new ArrayList<>();
 
     protected VillagerBase(EntityType<? extends VillagerBase> entityType, World world) {
         super(entityType, world);
@@ -78,10 +89,11 @@ public abstract class VillagerBase extends PathAwareEntity {
         WORK,
         SLEEP,
         COMMUTE,
-        RESTOCK,
+        RESTOCK, // only useful once we expand accessing store house into goal w/ chest animations etc
         PANIC,
         WANDER,
-        HOME;
+        HOME,
+        NONE;
     }
 
     @Override
@@ -93,6 +105,50 @@ public abstract class VillagerBase extends PathAwareEntity {
                 this.tryFindAHome();
             } else if (this.work == null) {
                 this.tryFindWork();
+            }
+
+
+            BuildingBase currentBuilding = this.getCurrentBuilding();
+            if (!this.itemsToGet.isEmpty() && currentBuilding instanceof StoreHouseBuilding){
+                // move this to a goal and do animations / moving to the chest it accesses
+
+                // first store all your items
+                for (int i=0;i<inventory.size();i++){
+                    ItemStack stack = inventory.getStack(i);
+                    if (stack != ItemStack.EMPTY) {
+                        boolean success = ((StoreHouseBuilding) currentBuilding).storeItem(stack);
+                        if (success) inventory.setStack(i, ItemStack.EMPTY);
+                    }
+                }
+
+                // need to get your tools back but should check that unique incase you tried another store house before idk might bug
+                this.itemsToGet.addAll(this.requiredTools);
+
+                // then take out the items you need
+                List<FetchType> found = new ArrayList<>();
+                for (FetchType toGet : this.itemsToGet){
+                    ItemStack item = ((StoreHouseBuilding) currentBuilding).getItem(toGet);
+                    if (item != null){
+                        boolean success = this.putInInventory(item);
+                        if (success){
+                            found.add(toGet);
+                        } else {
+                            ((StoreHouseBuilding) currentBuilding).storeItem(item);
+                        }
+
+                    }
+                }
+
+                for (FetchType f : found){
+                    this.itemsToGet.remove(f);
+                }
+
+                if (!this.itemsToGet.isEmpty()){
+                    BuildingBase target = StoreHouseBuilding.findStoreHouseWith(this.village, this.itemsToGet.get(0));
+                    if (target != null) this.startCommuteTo(target);
+                } else {
+                    this.currentActivity = Activity.NONE;
+                }
             }
 
             // todo: only check this every x ticks? idk if you want to be able to push them out of their home temporarily and have them wait a bit before running back
@@ -125,6 +181,33 @@ public abstract class VillagerBase extends PathAwareEntity {
                 // todo: start sleep animation
             }
         }
+    }
+
+    protected boolean putInInventory(ItemStack stack){
+        for (int i=0;i<inventory.size();i++){
+            ItemStack check = inventory.getStack(i);
+            if (check == ItemStack.EMPTY) {
+                inventory.setStack(i, stack);
+                return true;
+            }
+
+            int newCount = check.getCount() + stack.getCount();
+            if (check.getItem() == stack.getItem() && newCount <= stack.getItem().getMaxCount() && newCount < inventory.getMaxCountPerStack()){
+                stack.setCount(newCount);
+                inventory.setStack(i, stack);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected BuildingBase getCurrentBuilding() {
+        if (this.village == null) return null;
+        for (BuildingBase building : this.village.buildings){
+            if (this.atBuilding(building)) return building;
+        }
+        return null;
     }
 
     protected boolean isAwake(){

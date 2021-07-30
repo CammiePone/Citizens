@@ -6,6 +6,7 @@ import baritone.api.pathing.goals.GoalGetToBlock;
 import ca.lukegrahamlandry.citizens.CitizensMain;
 import ca.lukegrahamlandry.citizens.entity.LumberJackEntity;
 import ca.lukegrahamlandry.citizens.entity.VillagerBase;
+import ca.lukegrahamlandry.citizens.util.FetchType;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.tag.BlockTags;
@@ -27,7 +28,7 @@ public class FindTreesGoal extends Goal {
 
     @Override
     public boolean canStart() {
-        return this.villager.currentActivity == VillagerBase.Activity.WORK && villager.treePos == null && this.villager.home != null;
+        return this.villager.currentActivity == VillagerBase.Activity.WORK && villager.treePos == null && this.villager.home != null && this.villager.mustHold(FetchType.AXE);
     }
 
     @Override

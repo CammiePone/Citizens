@@ -296,6 +296,25 @@ public abstract class VillagerBase extends PathAwareEntity {
         this.currentActivity = Activity.COMMUTE;
     }
 
+    public boolean mustHold(FetchType toHold) {
+        if (toHold.check(this.getStackInHand(Hand.MAIN_HAND))) return true;
+
+        for (int i=0;i<this.inventory.size();i++){
+            ItemStack stack = this.inventory.getStack(i);
+            if (toHold.check(stack)){
+                this.setStackInHand(Hand.MAIN_HAND, stack);
+                this.inventory.setStack(i, ItemStack.EMPTY);
+                return true;
+            }
+        }
+
+        this.itemsToGet.add(toHold);
+        BuildingBase storehouse = StoreHouseBuilding.findStoreHouseWith(this.village, toHold);
+        this.startCommuteTo(storehouse);
+
+        return false;
+    }
+
     @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
         if (world.isClient) {
@@ -323,7 +342,7 @@ public abstract class VillagerBase extends PathAwareEntity {
     // will have to do main hand & off hand properly
     // TODO: save in nbt
 
-    class MainInventory implements Inventory {
+    public class MainInventory implements Inventory {
         private final DefaultedList<ItemStack> main;
 
         public MainInventory(){

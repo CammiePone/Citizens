@@ -9,6 +9,8 @@ import ca.lukegrahamlandry.citizens.CitizensMain;
 import ca.lukegrahamlandry.citizens.entity.FarmerEntity;
 import ca.lukegrahamlandry.citizens.entity.VillagerBase;
 import ca.lukegrahamlandry.citizens.util.FetchType;
+import ca.lukegrahamlandry.citizens.village.buildings.BuildingBase;
+import ca.lukegrahamlandry.citizens.village.buildings.StoreHouseBuilding;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -75,7 +77,6 @@ public class FarmGoal extends Goal {
         }
 
         if (!this.baritone.isActive()){
-            System.out.println("begin farm");
             BlockState state = this.world.getBlockState(this.target);
 
             if (state.getBlock() instanceof CropBlock && ((CropBlock) state.getBlock()).isMature(state)){
@@ -134,14 +135,18 @@ public class FarmGoal extends Goal {
 
         // go to store house and grab a stack of seeds
         this.villager.itemsToGet.add(FetchType.SEEDS);
-
+        BuildingBase storehouse = StoreHouseBuilding.findStoreHouseWith(this.villager.village, FetchType.SEEDS);
+        this.villager.startCommuteTo(storehouse);
+        CitizensMain.log("need seeds. from " + storehouse);
 
         return -1;
     }
 
+    int cropPosIndex = -1;
     private void findACrop() {
-        int index = this.villager.getRandom().nextInt(this.villager.work.getFloorSpace().size());
-        this.target = this.villager.work.getFloorSpace().get(index);
+        this.cropPosIndex = (this.cropPosIndex + 1) % this.villager.work.getFloorSpace().size();
+        this.target = this.villager.work.getFloorSpace().get(this.cropPosIndex);
+        // could do some thinking here to not have it walk to and check every empty space but eh
 
         CitizensMain.log("start farming " + target);
 
@@ -150,7 +155,7 @@ public class FarmGoal extends Goal {
     @Override
     public void stop() {
         CitizensMain.log("done farm");
-        this.villager.currentActivity = null;
-        this.villager.commuteLocation = null;
+        // this.villager.currentActivity = null;
+        // this.villager.commuteLocation = null;
     }
 }

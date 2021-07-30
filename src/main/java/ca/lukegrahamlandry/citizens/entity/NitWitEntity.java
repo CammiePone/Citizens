@@ -1,6 +1,7 @@
 package ca.lukegrahamlandry.citizens.entity;
 
 import ca.lukegrahamlandry.citizens.CitizensMain;
+import ca.lukegrahamlandry.citizens.village.buildings.BuildingBase;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -10,16 +11,9 @@ public class NitWitEntity extends VillagerBase{
         super(entityType, world);
     }
 
-    @Override
-    public Identifier getTexture() {
-        return new Identifier(CitizensMain.MOD_ID, "textures/entity/nitwit");
-    }
-
     // todo: different default schedual thats all wander no work
 
-    @Override
-    protected boolean tryFindWork() {
-        // doesnt work anywhere;
+    public boolean isValidWork(BuildingBase building){
         return false;
     }
 }

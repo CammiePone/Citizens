@@ -6,6 +6,7 @@ import ca.lukegrahamlandry.citizens.goals.VillagerSchedule;
 import ca.lukegrahamlandry.citizens.util.FetchType;
 import ca.lukegrahamlandry.citizens.village.Village;
 import ca.lukegrahamlandry.citizens.village.buildings.BuildingBase;
+import ca.lukegrahamlandry.citizens.village.buildings.FarmBuilding;
 import ca.lukegrahamlandry.citizens.village.buildings.HouseBuilding;
 import ca.lukegrahamlandry.citizens.village.buildings.StoreHouseBuilding;
 import net.minecraft.entity.EntityType;
@@ -45,9 +46,9 @@ import java.util.function.Function;
 
 // should eventually not be a PathAwareEntity and just use automatone for all pathfinding
 public abstract class VillagerBase extends PathAwareEntity {
-    protected BuildingBase home;
+    public BuildingBase home;
     public BuildingBase work;
-    protected Village village;
+    public Village village;
     public MainInventory inventory = new MainInventory();
 
     public List<FetchType> itemsToGet = new ArrayList<>();
@@ -64,7 +65,10 @@ public abstract class VillagerBase extends PathAwareEntity {
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0D).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2D);
     }
 
-    public abstract Identifier getTexture();
+    private static final Identifier STEVE = new Identifier("textures/entity/steve.png");
+    public Identifier getTexture(){
+        return STEVE;
+    }
 
     @Override
     protected void initGoals() {
@@ -117,7 +121,10 @@ public abstract class VillagerBase extends PathAwareEntity {
                     ItemStack stack = inventory.getStack(i);
                     if (stack != ItemStack.EMPTY) {
                         boolean success = ((StoreHouseBuilding) currentBuilding).storeItem(stack);
-                        if (success) inventory.setStack(i, ItemStack.EMPTY);
+                        if (success) {
+                            CitizensMain.log("put " + stack);
+                            inventory.setStack(i, ItemStack.EMPTY);
+                        }
                     }
                 }
 
@@ -131,6 +138,7 @@ public abstract class VillagerBase extends PathAwareEntity {
                     if (item != null){
                         boolean success = this.putInInventory(item);
                         if (success){
+                            CitizensMain.log("take " + item);
                             found.add(toGet);
                         } else {
                             ((StoreHouseBuilding) currentBuilding).storeItem(item);
@@ -166,7 +174,7 @@ public abstract class VillagerBase extends PathAwareEntity {
             if (!isCommuting && this.work != null && !this.atBuilding(this.work) && goal == Activity.WORK){
                 this.startCommuteTo(this.work);
                 System.out.println("go work");
-            } else if (this.atBuilding(this.work) && goal == Activity.WORK && this.currentActivity != Activity.WORK){
+            } else if (this.atBuilding(this.work) && goal == Activity.WORK && this.currentActivity != Activity.WORK && this.itemsToGet.isEmpty()){
                 this.currentActivity = Activity.WORK;
                 System.out.println("start work");
             }
@@ -247,7 +255,21 @@ public abstract class VillagerBase extends PathAwareEntity {
         return false;
     }
 
-    protected abstract boolean tryFindWork();
+    protected boolean tryFindWork(){
+        for (BuildingBase building : this.village.buildings){
+            if (this.isValidWork(building)){
+                if (building.hasOpenSpace()) {
+                    building.villagers.add(this);
+                    this.work = building;
+                    CitizensMain.log("found work at: " + building.getFirstInsidePos());
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public abstract boolean isValidWork(BuildingBase building);
 
     @Override
     public void onDeath(DamageSource source) {

@@ -10,6 +10,7 @@ import ca.lukegrahamlandry.citizens.village.buildings.FarmBuilding;
 import ca.lukegrahamlandry.citizens.village.buildings.HouseBuilding;
 import ca.lukegrahamlandry.citizens.village.buildings.StoreHouseBuilding;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.EscapeDangerGoal;
 import net.minecraft.entity.ai.goal.FleeEntityGoal;
@@ -105,6 +106,14 @@ public abstract class VillagerBase extends PathAwareEntity {
         super.tick();
 
         if (!world.isClient()){
+            // pick up items
+            List<ItemEntity> items = this.world.getEntitiesByClass(ItemEntity.class, this.getBoundingBox().expand(2), (e) -> true);
+            for (ItemEntity item : items){
+                boolean success = this.putInInventory(item.getStack());
+                if (success) item.remove(RemovalReason.KILLED);
+            }
+
+
             if (this.home == null) {
                 this.tryFindAHome();
             } else if (this.work == null) {
@@ -299,6 +308,7 @@ public abstract class VillagerBase extends PathAwareEntity {
     public boolean mustHold(FetchType toHold) {
         if (toHold.check(this.getStackInHand(Hand.MAIN_HAND))) return true;
 
+        CitizensMain.log("look for item");
         for (int i=0;i<this.inventory.size();i++){
             ItemStack stack = this.inventory.getStack(i);
             if (toHold.check(stack)){

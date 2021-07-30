@@ -2,6 +2,7 @@ package ca.lukegrahamlandry.citizens.registry;
 
 import ca.lukegrahamlandry.citizens.CitizensMain;
 import ca.lukegrahamlandry.citizens.entity.FarmerEntity;
+import ca.lukegrahamlandry.citizens.entity.LumberJackEntity;
 import ca.lukegrahamlandry.citizens.entity.VillagerBase;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -19,6 +20,7 @@ public class EntityInit {
     public static final Map<EntityType, Identifier> ENTITIES = new HashMap<>();
 
     public static final EntityType<FarmerEntity> FARMER = create("farmer", FarmerEntity::new, VillagerBase.attributes(), 0.6F, 1.95F);
+    public static final EntityType<FarmerEntity> LUMBER_JACK = create("lumber_jack", LumberJackEntity::new, VillagerBase.attributes(), 0.6F, 1.95F);
 
     private static EntityType create(String name, EntityType.EntityFactory supplier, DefaultAttributeContainer.Builder attributes, float width, float height) {
         EntityType type = FabricEntityTypeBuilder.create(SpawnGroup.MISC, supplier).dimensions(EntityDimensions.fixed(width, height)).build();

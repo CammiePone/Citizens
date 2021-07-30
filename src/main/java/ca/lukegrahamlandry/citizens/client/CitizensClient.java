@@ -12,5 +12,6 @@ public class CitizensClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         EntityRendererRegistry.INSTANCE.register(EntityInit.FARMER, VillagerRenderer::new);
+        EntityRendererRegistry.INSTANCE.register(EntityInit.LUMBER_JACK, VillagerRenderer::new);
     }
 }

@@ -32,6 +32,9 @@ public class LumberJackEntity extends VillagerBase {
     @Override
     public void tick() {
         super.tick();
+        if (this.getTargetActivity() == Activity.WORK && this.currentActivity != Activity.WORK && this.currentActivity != Activity.COMMUTE){
+            this.currentActivity = Activity.WORK;
+        }
     }
 
 

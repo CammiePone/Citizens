@@ -15,13 +15,16 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CropBlock;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class FarmGoal extends Goal {
     FarmerEntity villager;
@@ -38,7 +41,7 @@ public class FarmGoal extends Goal {
 
     @Override
     public boolean canStart() {
-        return this.villager.currentActivity == VillagerBase.Activity.WORK && this.villager.atBuilding(villager.work);
+        return this.villager.currentActivity == VillagerBase.Activity.WORK && this.villager.atBuilding(villager.work) && this.villager.mustHold(FetchType.HOE);
     }
 
     @Override
@@ -77,6 +80,7 @@ public class FarmGoal extends Goal {
         }
 
         if (!this.baritone.isActive()){
+            this.villager.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, Vec3d.ofCenter(this.target));
             BlockState state = this.world.getBlockState(this.target);
 
             if (state.getBlock() instanceof CropBlock && ((CropBlock) state.getBlock()).isMature(state)){
@@ -90,6 +94,8 @@ public class FarmGoal extends Goal {
 
                 // todo: support for double crops like melons and pumpkins
                 // todo: support for non-farmland crops like cactus and sugar cane
+                // let data pack add like: seeds, soil block, needs water, etc?
+
 
                 int seedIndex = pickSeeds();
                 if (seedIndex >= 0){
@@ -107,6 +113,15 @@ public class FarmGoal extends Goal {
                             // todo: check that is dirt even tho the building should have checked already it might have changed
                             // todo: require having a hoe and do animation and use durability
                             world.setBlockState(this.target.down(), Blocks.FARMLAND.getDefaultState(), 3);
+
+                            // use hoe durability
+                            this.villager.mustHold(FetchType.HOE);
+                            ItemStack stack = this.villager.getStackInHand(Hand.MAIN_HAND);
+                            stack.setDamage(stack.getDamage() + 1);
+                            if (stack.getDamage() >= stack.getMaxDamage()){
+                                stack.decrement(1);
+                            }
+
                             System.out.println("make farm");
                             if (block.canPlaceAt(soil, world, this.target)){
                                 System.out.println("use farm");

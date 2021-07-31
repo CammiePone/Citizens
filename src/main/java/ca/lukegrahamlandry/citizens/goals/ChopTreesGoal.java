@@ -45,6 +45,7 @@ public class ChopTreesGoal extends Goal {
         this.baritone = BaritoneAPI.getProvider().getBaritone(this.villager);
         CitizensMain.log("path to tree: " + this.villager.treePos);
         this.baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(this.villager.treePos));
+        this.baritone.settings().allowBreak.set(true);
         theTree.clear();
         this.index = -1;
     }
@@ -56,7 +57,7 @@ public class ChopTreesGoal extends Goal {
 
     @Override
     public void tick() {
-        if (!this.baritone.isActive()) {
+        if (!this.baritone.getCustomGoalProcess().isActive()) {
             delay--;
             if (delay > 0) return;
 

@@ -3,6 +3,7 @@ package ca.lukegrahamlandry.citizens.goals;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.pathing.goals.GoalGetToBlock;
+import baritone.api.pathing.goals.GoalXZ;
 import ca.lukegrahamlandry.citizens.CitizensMain;
 import ca.lukegrahamlandry.citizens.entity.LumberJackEntity;
 import ca.lukegrahamlandry.citizens.entity.VillagerBase;
@@ -39,6 +40,8 @@ public class FindTreesGoal extends Goal {
         this.baritone = BaritoneAPI.getProvider().getBaritone(this.villager);
         this.baritone.getCustomGoalProcess().setGoalAndPath(null);
         this.baritone.settings().allowSprint.set(true);
+        this.baritone.settings().allowBreak.set(true);
+        this.time = 0;
         CitizensMain.log("start finding trees");
     }
 
@@ -47,26 +50,33 @@ public class FindTreesGoal extends Goal {
         this.searchPositions.clear();
     }
 
+
+    int time;
     @Override
     public void tick() {
-        if (!this.baritone.isActive()) {
+        this.time++;
+        CitizensMain.log(String.valueOf(time));
+        if (this.time % 4 == 0){  // should probably be way less often
+            CitizensMain.log("search for trees");
             BlockPos tree = findTreesAround(this.villager.getBlockPos());
-            if (tree == null){
-                this.posIndex = (this.posIndex + 1) % this.searchPositions.size();
-                BlockPos middle = this.searchPositions.get(this.posIndex).south(AREA_SIZE / 2).east(AREA_SIZE / 2);
-                this.baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(middle));
-                // CitizensMain.log("try again at "  + middle);
-            } else {
+            if (tree != null){
+                this.baritone.getCustomGoalProcess().setGoalAndPath(null);
                 this.villager.treePos = tree;
                 CitizensMain.log("found tree at " + tree);
+                return;
             }
         }
-
+        if (!this.baritone.isActive()) {
+            this.posIndex = (this.posIndex + 1) % this.searchPositions.size();
+            BlockPos middle = this.searchPositions.get(this.posIndex).south(AREA_SIZE / 2).east(AREA_SIZE / 2);
+            this.baritone.getCustomGoalProcess().setGoalAndPath(new GoalXZ(middle.getX(), middle.getZ()));
+            // CitizensMain.log("try again at "  + middle);
+        }
     }
 
     // a RADIUS_IN_AREASxRADIUS_IN_AREAS square of AREA_SIZExAREA_SIZE squares of blocks
     int AREA_SIZE = 10;
-    int RADIUS_IN_AREAS = 5;
+    int RADIUS_IN_AREAS = 3;
     public List<BlockPos> calculateSearchPositions(BlockPos middle){
         CitizensMain.log("setup search pos");
 
@@ -87,29 +97,28 @@ public class FindTreesGoal extends Goal {
         return searchAt;
     }
 
+    int RANGE = 10;
     private BlockPos findTreesAround(BlockPos pos) {
-        CitizensMain.log("look for trees around " + pos);
-        for (int x = 0; x< AREA_SIZE; x++){
-            // for (int y=-1;y<1;y++){
-            int y = 0;
-                for (int z = 0; z< AREA_SIZE; z++){
-                    BlockPos check = pos.add(x,y,z);
+        for (int x = -RANGE; x< RANGE; x++){
+            for (int y=-3;y<4;y++){
+                for (int z = -RANGE; z< RANGE; z++) {
+                    BlockPos check = pos.add(x, y, z);
 
                     // CitizensMain.log("check " + check);
 
                     int height = 0;
                     BlockState state = this.villager.world.getBlockState(check);
-                    while (state.isIn(BlockTags.LOGS)){
+                    while (state.isIn(BlockTags.LOGS)) {
                         height++;
                         check = check.up();
                         state = this.villager.world.getBlockState(check);
                         // CitizensMain.log("check for wood " + check);
                     }
 
-                    if (height > 0){
+                    if (height > 1) {
                         // CitizensMain.log("height " + height);
 
-                        for (int i=0;i<6;i++){
+                        for (int i = 0; i < 6; i++) {
                             Direction dir = Direction.byId(i);
                             BlockState checkState = this.villager.world.getBlockState(check.offset(dir));
                             if (checkState.isIn(BlockTags.LEAVES)) {
@@ -118,11 +127,12 @@ public class FindTreesGoal extends Goal {
                             }
                         }
                     }
-               // }
+                }
             }
         }
 
-        CitizensMain.log("found no trees");
+        // todo: save in list and choose the closest one
+
         return null;
     }
 }

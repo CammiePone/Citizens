@@ -38,6 +38,7 @@ public class FindTreesGoal extends Goal {
 
         this.baritone = BaritoneAPI.getProvider().getBaritone(this.villager);
         this.baritone.getCustomGoalProcess().setGoalAndPath(null);
+        this.baritone.settings().allowSprint.set(true);
         CitizensMain.log("start finding trees");
     }
 
@@ -64,8 +65,8 @@ public class FindTreesGoal extends Goal {
     }
 
     // a RADIUS_IN_AREASxRADIUS_IN_AREAS square of AREA_SIZExAREA_SIZE squares of blocks
-    int AREA_SIZE = 5;
-    int RADIUS_IN_AREAS = 3;
+    int AREA_SIZE = 10;
+    int RADIUS_IN_AREAS = 5;
     public List<BlockPos> calculateSearchPositions(BlockPos middle){
         CitizensMain.log("setup search pos");
 

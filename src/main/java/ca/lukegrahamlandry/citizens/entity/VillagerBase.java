@@ -63,7 +63,7 @@ public abstract class VillagerBase extends PathAwareEntity {
 
     public static DefaultAttributeContainer.Builder attributes() {
         return LivingEntity.createLivingAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 16.0D).add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK)
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0D).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2D);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0D).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.55D);
     }
 
     private static final Identifier STEVE = new Identifier("textures/entity/steve.png");
